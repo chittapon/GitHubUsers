@@ -110,7 +110,7 @@ class GitHubUsersUITests: XCTestCase {
         let userCell = app.cells.staticTexts[userName]
         userCell.tap()
         
-        XCTAssert(app.cells["RepositoryTableViewCell"].exists)
+        XCTAssert(app.cells["RepositoryTableViewCell"].waitForExistence(timeout: 5))
     }
 }
 
