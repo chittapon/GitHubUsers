@@ -47,7 +47,7 @@ class RepositoryListViewModelTests: XCTestCase {
         // When
         viewModel.getRepositoryList()
         let mockRepos: [UserRepository] = MockJSON.fromFile(name: "mock_repos.json")
-        mockUseCase.onResponseRepositories(.success(model: mockRepos))
+        mockUseCase.onResponseRepositories(.success(mockRepos))
         
         // Then
         XCTAssert(!output.repos.isEmpty)
@@ -59,7 +59,7 @@ class RepositoryListViewModelTests: XCTestCase {
         
         // When
         viewModel.getRepositoryList()
-        mockUseCase.onResponseRepositories(.failure(error: error))
+        mockUseCase.onResponseRepositories(.failure(error))
         
         // Then
         XCTAssert(output.isShowErrorMessage)

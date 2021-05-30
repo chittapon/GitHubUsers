@@ -35,7 +35,7 @@ class UserListViewModelTests: XCTestCase {
         // When
         viewModel.getUserList()
         let mockUsers: [User] = MockJSON.fromFile(name: "mock_users.json")
-        mockUseCase.onResponseUsers(.success(model: mockUsers))
+        mockUseCase.onResponseUsers(.success(mockUsers))
     
         // Then
         XCTAssert(!output.users.isEmpty)
@@ -47,7 +47,7 @@ class UserListViewModelTests: XCTestCase {
 
         // When
         viewModel.getUserList()
-        mockUseCase.onResponseUsers(.failure(error: error))
+        mockUseCase.onResponseUsers(.failure(error))
     
         // Then
         XCTAssert(output.isShowErrorMessage)
@@ -60,7 +60,7 @@ class UserListViewModelTests: XCTestCase {
         // When
         viewModel.searchUsers(keyword: "chittapon")
         let mockSearchResponse: SearchUserResponse = MockJSON.fromFile(name: "mock_search_users.json")
-        mockUseCase.onSearchUsers(.success(model: mockSearchResponse.items!))
+        mockUseCase.onSearchUsers(.success(mockSearchResponse.items!))
         
         // Then
         XCTAssert(!output.users.isEmpty)
@@ -72,7 +72,7 @@ class UserListViewModelTests: XCTestCase {
         
         // When
         viewModel.searchUsers(keyword: "chittapon")
-        mockUseCase.onSearchUsers(.failure(error: error))
+        mockUseCase.onSearchUsers(.failure(error))
         
         // Then
         XCTAssert(output.isShowErrorMessage)
@@ -82,7 +82,7 @@ class UserListViewModelTests: XCTestCase {
         // Given
         viewModel.getUserList()
         let mockUsers: [User] = MockJSON.fromFile(name: "mock_sort_users.json")
-        mockUseCase.onResponseUsers(.success(model: mockUsers))
+        mockUseCase.onResponseUsers(.success(mockUsers))
         
         // When
         viewModel.sortBy(ascending: true)
@@ -96,7 +96,7 @@ class UserListViewModelTests: XCTestCase {
         // Given
         viewModel.getUserList()
         let mockUsers: [User] = MockJSON.fromFile(name: "mock_sort_users.json")
-        mockUseCase.onResponseUsers(.success(model: mockUsers))
+        mockUseCase.onResponseUsers(.success(mockUsers))
         
         // When
         viewModel.sortBy(ascending: false)
@@ -111,7 +111,7 @@ class UserListViewModelTests: XCTestCase {
         viewModel.getUserList()
         let mockUsers: [User] = MockJSON.fromFile(name: "mock_sort_users.json")
         mockUsers.first?.isFavorite = true
-        mockUseCase.onResponseUsers(.success(model: mockUsers))
+        mockUseCase.onResponseUsers(.success(mockUsers))
         
         // When
         viewModel.filterFavorite(active: true)
@@ -124,7 +124,7 @@ class UserListViewModelTests: XCTestCase {
         // Given
         viewModel.getUserList()
         let mockUsers: [User] = MockJSON.fromFile(name: "mock_sort_users.json")
-        mockUseCase.onResponseUsers(.success(model: mockUsers))
+        mockUseCase.onResponseUsers(.success(mockUsers))
         
         // When
         viewModel.filterFavorite(active: false)
@@ -154,23 +154,23 @@ class MockGitHubUseCase: GitHubUseCaseProtocol {
 
     var isGetUsersCalled = false
     var users: [User] = []
-    var onResponseUsers: ((ResponseModel<[User]>) -> Void)!
-    var onSearchUsers: ((ResponseModel<[User]>) -> Void)!
+    var onResponseUsers: ((Result<[User], Error>) -> Void)!
+    var onSearchUsers: ((Result<[User], Error>) -> Void)!
     var isFilterOnlyFavorite = false
     var repos: [UserRepository] = []
-    var onResponseRepositories: ((ResponseModel<[UserRepository]>) -> Void)!
+    var onResponseRepositories: ((Result<[UserRepository], Error>) -> Void)!
     
     enum MockAPIError: Error {
         case badRequest
         case requestLimitation
     }
     
-    func getUsers(onResponse: @escaping (ResponseModel<[User]>) -> Void) {
+    func getUsers(onResponse: @escaping (Result<[User], Error>) -> Void) {
         isGetUsersCalled = true
         onResponseUsers = onResponse
     }
     
-    func searchUsers(keyword: String, onResponse: @escaping (ResponseModel<[User]>) -> Void) {
+    func searchUsers(keyword: String, onResponse: @escaping (Result<[User], Error>) -> Void) {
         onSearchUsers = onResponse
     }
     
@@ -186,7 +186,7 @@ class MockGitHubUseCase: GitHubUseCaseProtocol {
         
     }
     
-    func getRepositories(userName: String, onResponse: @escaping (ResponseModel<[UserRepository]>) -> Void) {
+    func getRepositories(userName: String, onResponse: @escaping (Result<[UserRepository], Error>) -> Void) {
         onResponseRepositories = onResponse
     }
     

@@ -49,7 +49,7 @@ class GitHubUsersUITests: XCTestCase {
         app = XCUIApplication()
         app.launch()
         
-        XCTAssert(app.alerts.firstMatch.exists)
+        XCTAssert(app.alerts.firstMatch.waitForExistence(timeout: 5))
     }
     
     func test_search_users() throws {
@@ -76,7 +76,7 @@ class GitHubUsersUITests: XCTestCase {
         app.searchFields.firstMatch.typeText(searchText)
         
         let targetCell = app.cells.staticTexts[searchText]
-        XCTAssert(targetCell.exists)
+        XCTAssert(targetCell.waitForExistence(timeout: 5))
     }
     
     func test_show_repository_list() throws {

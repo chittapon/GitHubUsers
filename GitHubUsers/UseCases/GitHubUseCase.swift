@@ -8,18 +8,13 @@
 import Foundation
 import Moya
 
-enum ResponseModel<Model: Decodable> {
-    case success(model: Model)
-    case failure(error: Error)
-}
-
 protocol GitHubUseCaseProtocol {
-    func getUsers(onResponse: @escaping (ResponseModel<[User]>) -> Void)
-    func searchUsers(keyword: String, onResponse: @escaping (ResponseModel<[User]>) -> Void)
+    func getUsers(onResponse: @escaping (Result<[User], Error>) -> Void)
+    func searchUsers(keyword: String, onResponse: @escaping (Result<[User], Error>) -> Void)
     func getFavoriteUsers() -> [User]
     func addFavorite(user: User)
     func removeFavorite(user: User)
-    func getRepositories(userName: String, onResponse: @escaping (ResponseModel<[UserRepository]>) -> Void) 
+    func getRepositories(userName: String, onResponse: @escaping (Result<[UserRepository], Error>) -> Void)
 }
 
 class GitHubUseCase: GitHubUseCaseProtocol {
@@ -33,7 +28,7 @@ class GitHubUseCase: GitHubUseCaseProtocol {
         self.userDefault = userDefault
     }
     
-    func getUsers(onResponse: @escaping (ResponseModel<[User]>) -> Void) {
+    func getUsers(onResponse: @escaping (Result<[User], Error>) -> Void) {
         
         let target: MultiTarget = .init(GitHubAPI.userList())
         
@@ -50,11 +45,11 @@ class GitHubUseCase: GitHubUseCaseProtocol {
                             user.isFavorite = true
                         }
                     }
-                    onResponse(.success(model: users))
-                } catch { onResponse(.failure(error: error)) }
+                    onResponse(.success(users))
+                } catch { onResponse(.failure(error)) }
                 
             case .failure(let error):
-                onResponse(.failure(error: error))
+                onResponse(.failure(error))
             }
         }
         
@@ -76,7 +71,7 @@ class GitHubUseCase: GitHubUseCaseProtocol {
         try? userDefault.setObject(object: users, forKey: "users")
     }
     
-    func getRepositories(userName: String, onResponse: @escaping (ResponseModel<[UserRepository]>) -> Void) {
+    func getRepositories(userName: String, onResponse: @escaping (Result<[UserRepository], Error>) -> Void) {
         
         let target: MultiTarget = .init(GitHubAPI.repoList(userName: userName))
         
@@ -87,16 +82,16 @@ class GitHubUseCase: GitHubUseCaseProtocol {
             case .success(let response):
                 do {
                     let repos = try response.data.decode(type: [UserRepository].self)
-                    onResponse(.success(model: repos))
-                } catch { onResponse(.failure(error: error)) }
+                    onResponse(.success(repos))
+                } catch { onResponse(.failure(error)) }
                 
             case .failure(let error):
-                onResponse(.failure(error: error))
+                onResponse(.failure(error))
             }
         }
     }
     
-    func searchUsers(keyword: String, onResponse: @escaping (ResponseModel<[User]>) -> Void) {
+    func searchUsers(keyword: String, onResponse: @escaping (Result<[User], Error>) -> Void) {
         
         let target: MultiTarget = .init(GitHubAPI.search(keyword: keyword))
         
@@ -108,7 +103,7 @@ class GitHubUseCase: GitHubUseCaseProtocol {
                 do {
                     let searchUsers = try response.data.decode(type: SearchUserResponse.self)
                     guard searchUsers.items != nil else {
-                        onResponse(.failure(error: MoyaError.jsonMapping(response)))
+                        onResponse(.failure(MoyaError.jsonMapping(response)))
                         return
                     }
                     let users = searchUsers.items ?? []
@@ -118,11 +113,11 @@ class GitHubUseCase: GitHubUseCaseProtocol {
                             user.isFavorite = true
                         }
                     }
-                    onResponse(.success(model: users))
-                } catch { onResponse(.failure(error: error)) }
+                    onResponse(.success(users))
+                } catch { onResponse(.failure(error)) }
                 
             case .failure(let error):
-                onResponse(.failure(error: error))
+                onResponse(.failure(error))
             }
         }
     }
